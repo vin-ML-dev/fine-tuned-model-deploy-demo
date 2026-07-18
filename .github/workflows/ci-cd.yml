@@ -11,14 +11,11 @@
 #   bash k8s/deploy_release.sh <sha>
 # (In a cloud cluster this job would run `kubectl set image` directly,
 #  or Argo CD would watch the registry - noted for the GKE upgrade later.)
-
 name: ci-cd
-
 on:
   push:
     branches: [main]
   pull_request:
-
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -33,7 +30,6 @@ jobs:
           pip install pytest
       - name: Run unit tests
         run: pytest tests/ -v
-
   build-and-push:
     needs: test
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -44,13 +40,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Container registries require lowercase repository paths, but the
+      # GitHub owner name can contain uppercase (e.g. vin-ML-dev).
+      # ${VAR,,} is bash's lowercase expansion; writing to $GITHUB_ENV
+      # makes OWNER_LC available to all later steps as env.OWNER_LC.
+      - name: Lowercase owner
+        run: echo "OWNER_LC=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
+
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}   # built-in, no setup needed
-
       - name: Build and push image
         uses: docker/build-push-action@v6
         with:
@@ -58,12 +60,11 @@ jobs:
           file: serving/Dockerfile.api
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/novabot-api:${{ github.sha }}
-            ghcr.io/${{ github.repository_owner }}/novabot-api:latest
-
+            ghcr.io/${{ env.OWNER_LC }}/novabot-api:${{ github.sha }}
+            ghcr.io/${{ env.OWNER_LC }}/novabot-api:latest
       - name: Print release info
         run: |
           echo "Image pushed:"
-          echo "  ghcr.io/${{ github.repository_owner }}/novabot-api:${{ github.sha }}"
+          echo "  ghcr.io/${OWNER_LC}/novabot-api:${{ github.sha }}"
           echo "Deploy locally with:"
-          echo "  bash k8s/deploy_release.sh ${{ github.sha }}"
+          echo "  GHCR_OWNER=${OWNER_LC} bash k8s/deploy_release.sh ${{ github.sha }}"
