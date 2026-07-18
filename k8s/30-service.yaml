@@ -1,0 +1,17 @@
+# Phase 5 - Service: stable virtual IP + load balancing across api pods.
+# Pods come and go (rollouts, crashes, scaling) - the Service endpoint doesn't.
+# ClusterIP = internal only; we reach it locally via `kubectl port-forward`.
+# (In a cloud cluster this would be type LoadBalancer or behind an Ingress.)
+apiVersion: v1
+kind: Service
+metadata:
+  name: novabot-api
+  namespace: novabot
+spec:
+  type: ClusterIP
+  selector:
+    app: novabot-api          # routes to any pod with this label that is READY
+  ports:
+    - name: http
+      port: 80                # service port
+      targetPort: 8000        # container port

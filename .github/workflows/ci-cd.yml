@@ -1,0 +1,69 @@
+# Phase 5 - Step 21: CI/CD pipeline.
+#
+# On every push / PR:
+#   test  -> unit tests (no engine, no secrets needed)
+# On push to main additionally:
+#   build -> build the API Docker image, push to GitHub Container Registry
+#            tagged with the commit SHA (immutable) + 'latest'
+#
+# Deploy step: the cluster is on your laptop, which GitHub can't reach -
+# so CD is a pull-based local command (see README):
+#   bash k8s/deploy_release.sh <sha>
+# (In a cloud cluster this job would run `kubectl set image` directly,
+#  or Argo CD would watch the registry - noted for the GKE upgrade later.)
+
+name: ci-cd
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install deps
+        run: |
+          pip install -r serving/requirements-api.txt
+          pip install pytest
+      - name: Run unit tests
+        run: pytest tests/ -v
+
+  build-and-push:
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write          # allows pushing to ghcr.io
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}   # built-in, no setup needed
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: serving/Dockerfile.api
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/novabot-api:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/novabot-api:latest
+
+      - name: Print release info
+        run: |
+          echo "Image pushed:"
+          echo "  ghcr.io/${{ github.repository_owner }}/novabot-api:${{ github.sha }}"
+          echo "Deploy locally with:"
+          echo "  bash k8s/deploy_release.sh ${{ github.sha }}"

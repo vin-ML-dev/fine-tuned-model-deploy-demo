@@ -1,0 +1,28 @@
+# Phase 4/5 - Hybrid mode: FastAPI runs LOCALLY, engine is REMOTE (RunPod GPU).
+#
+#   user -> FastAPI (local Docker, :8000) -> RunPod vLLM endpoint (GPU)
+#
+# Setup: create serving/.env with:
+#   ENGINE_BASE_URL=https://api.runpod.ai/v2/<ENDPOINT_ID>/openai/v1   (serverless)
+#     or            https://<POD_ID>-8000.proxy.runpod.net/v1          (GPU pod, engine exposed)
+#   ENGINE_API_KEY=rpa_xxx        (RunPod API key - required for serverless)
+#   MODEL_NAME=vinmlops/technova-1.5b-instruct
+#
+# Run:
+#   docker compose -f serving/docker-compose.remote.yml up --build
+# Test:
+#   curl -s localhost:8000/readyz
+#   python serving/test_api.py
+
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: serving/Dockerfile.api
+    env_file:
+      - .env
+    environment:
+      - RATE_LIMIT_RPM=60
+      - REQUEST_TIMEOUT_S=90     # serverless cold starts can be slow
+    ports:
+      - "8000:8000"

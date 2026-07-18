@@ -1,0 +1,24 @@
+# Phase 4 - Step 17: Container image for the NovaBot FastAPI wrapper.
+# Small, non-root, production-style.
+FROM python:3.12-slim
+
+WORKDIR /srv
+
+# install deps first (layer caching: deps change less often than code)
+COPY serving/requirements-api.txt .
+RUN pip install --no-cache-dir -r requirements-api.txt
+
+# copy app code
+COPY serving/app ./app
+
+# non-root user (security best practice)
+RUN useradd -m appuser
+USER appuser
+
+EXPOSE 8000
+
+# healthcheck used by docker; K8s uses /healthz + /readyz probes instead
+HEALTHCHECK --interval=30s --timeout=3s CMD \
+  python -c "import urllib.request;urllib.request.urlopen('http://localhost:8000/healthz')" || exit 1
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

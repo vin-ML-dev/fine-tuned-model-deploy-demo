@@ -1,0 +1,29 @@
+# =============================================================
+# Phase 4/5 - GPU image for RunPod: vLLM engine + FastAPI wrapper
+# in ONE container (RunPod runs a single container per pod).
+#
+# Build (on any machine with Docker - no GPU needed to build):
+#   docker build -f serving/Dockerfile.gpu -t <dockerhub-user>/novabot-gpu:v1 .
+#   docker push <dockerhub-user>/novabot-gpu:v1
+#
+# The image contains NO model weights - they're pulled from HF Hub
+# at container start (pass HF_TOKEN env for private repos).
+# =============================================================
+FROM vllm/vllm-openai:latest
+
+# API-layer dependencies (vLLM base already has python + torch + cuda)
+COPY serving/requirements-api.txt /srv/requirements-api.txt
+RUN pip install --no-cache-dir -r /srv/requirements-api.txt
+
+# App code + startup script
+COPY serving/app /srv/app
+COPY serving/entrypoint.gpu.sh /srv/entrypoint.sh
+RUN chmod +x /srv/entrypoint.sh
+
+WORKDIR /srv
+
+# 8000 = FastAPI (public), 8001 = vLLM (internal)
+EXPOSE 8000 8001
+
+# vllm/vllm-openai sets its own ENTRYPOINT (vllm serve) - override it
+ENTRYPOINT ["/bin/bash", "/srv/entrypoint.sh"]

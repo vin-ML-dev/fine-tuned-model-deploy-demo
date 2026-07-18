@@ -1,0 +1,70 @@
+# Phase 5 - Steps 19/22: Deployment of the NovaBot API.
+#
+# - 2 replicas: survives one pod dying (self-healing demo)
+# - Rolling update strategy: zero-downtime deploys (step 22)
+# - liveness  -> /healthz : hung process gets restarted
+# - readiness -> /readyz  : pod receives traffic only when the engine is reachable
+# - resources: requests = scheduling reservation, limits = hard cap
+#   (HPA percentage targets are relative to *requests*)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: novabot-api
+  namespace: novabot
+  labels:
+    app: novabot-api
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1           # allow 1 extra pod during rollout
+      maxUnavailable: 0     # never drop below desired count -> zero downtime
+  selector:
+    matchLabels:
+      app: novabot-api
+  template:
+    metadata:
+      labels:
+        app: novabot-api
+    spec:
+      containers:
+        - name: api
+          # kind/local: built + loaded by setup script.
+          # CI/CD later swaps this tag per release (e.g. ghcr.io/<owner>/novabot-api:sha)
+          image: novabot-api:local
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - secretRef:
+                name: engine-credentials
+          env:
+            - name: MODEL_NAME
+              value: "vinmlops/technova-1.5b-instruct"
+            - name: RATE_LIMIT_RPM
+              value: "60"
+            - name: REQUEST_TIMEOUT_S
+              value: "90"
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 8       # /readyz calls RunPod - give it time
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"

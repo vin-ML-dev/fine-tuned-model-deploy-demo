@@ -1,0 +1,57 @@
+# =============================================================
+# QLoRA fine-tuning configuration - tuned for Google Colab T4 GPU
+# =============================================================
+
+model:
+  base_model: "Qwen/Qwen2.5-1.5B-Instruct"   # non-gated, T4-friendly
+  max_seq_length: 512
+
+quantization:                # QLoRA 4-bit settings
+  load_in_4bit: true
+  bnb_4bit_quant_type: "nf4"
+  bnb_4bit_compute_dtype: "float16"   # T4 has NO bf16 support -> fp16
+  bnb_4bit_use_double_quant: true
+
+lora:
+  r: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  bias: "none"
+  target_modules:
+    - q_proj
+    - k_proj
+    - v_proj
+    - o_proj
+    - gate_proj
+    - up_proj
+    - down_proj
+
+training:
+  output_dir: "outputs/qlora-technova"
+  num_train_epochs: 4
+  per_device_train_batch_size: 4
+  gradient_accumulation_steps: 4      # effective batch size = 16
+  learning_rate: 2.0e-4
+  lr_scheduler_type: "cosine"
+  warmup_ratio: 0.05
+  weight_decay: 0.01
+  logging_steps: 5
+  eval_strategy: "epoch"
+  save_strategy: "epoch"
+  save_total_limit: 2
+  load_best_model_at_end: true
+  metric_for_best_model: "eval_loss"
+  greater_is_better: false
+  fp16: true                          # T4 -> fp16, not bf16
+  gradient_checkpointing: true
+  optim: "paged_adamw_8bit"
+  seed: 42
+  report_to: "tensorboard"            # experiment tracking
+
+early_stopping:
+  patience: 2                         # stop if eval_loss doesn't improve for 2 epochs
+
+data:
+  train_file: "data/processed/train.jsonl"
+  val_file: "data/processed/val.jsonl"
+  test_file: "data/processed/test.jsonl"

@@ -1,0 +1,5 @@
+# Phase 5 - Step 19: Namespace (isolates all NovaBot resources)
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: novabot

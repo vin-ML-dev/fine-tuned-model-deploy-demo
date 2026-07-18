@@ -1,0 +1,256 @@
+================================================================================
+TECHNOVA SOLUTIONS PVT. LTD. - OFFICIAL COMPANY KNOWLEDGE BASE
+Version 2.3 | Last Updated: June 2026
+================================================================================
+
+--------------------------------------------------------------------------------
+SECTION 1: COMPANY OVERVIEW
+--------------------------------------------------------------------------------
+TechNova Solutions Pvt. Ltd. is a technology company founded in 2015 and
+headquartered in Bengaluru, India, with regional offices in Delhi, Pune, and
+Singapore. TechNova specializes in cloud software, AI-powered analytics, and
+enterprise IT services. The company serves over 800 enterprise clients across
+22 countries and employs approximately 1,200 people. TechNova is privately
+held, and its founding CEO is Ananya Rao. The CTO is Vikram Mehta and the
+Chief People Officer is Sarah D'Souza.
+
+Key facts:
+- Founded: 2015
+- Headquarters: Bengaluru, India
+- Offices: Bengaluru (HQ), Delhi, Pune, Singapore
+- Employees: ~1,200
+- CEO: Ananya Rao | CTO: Vikram Mehta | CPO: Sarah D'Souza
+- Industry: Cloud software, AI analytics, enterprise IT services
+
+--------------------------------------------------------------------------------
+SECTION 2: MISSION, VISION, AND CORE VALUES
+--------------------------------------------------------------------------------
+Mission: To empower businesses of every size with intelligent, secure, and
+accessible technology that turns data into decisions.
+
+Vision: To be Asia's most trusted technology partner by 2030, known for
+innovation, integrity, and customer obsession.
+
+Core Values:
+1. Customer First - Every decision starts with customer impact.
+2. Integrity Always - We do the right thing, even when no one is watching.
+3. Innovate Fearlessly - We experiment, learn fast, and improve continuously.
+4. One Team - We win together, across functions and geographies.
+5. Own It - We take responsibility for outcomes, not just tasks.
+
+--------------------------------------------------------------------------------
+SECTION 3: PRODUCTS AND SERVICES
+--------------------------------------------------------------------------------
+1. NovaCloud - A managed cloud hosting platform with auto-scaling, 99.95%
+   uptime SLA, and pay-as-you-go pricing. Plans start at INR 4,999/month.
+2. NovaAnalytics - An AI-powered business intelligence suite with dashboards,
+   forecasting, and anomaly detection. Pricing starts at INR 2,499/user/month.
+3. NovaChat - An enterprise chatbot platform for customer support automation,
+   supporting 15+ languages. Pricing starts at INR 9,999/month.
+4. NovaSecure - A cybersecurity monitoring service including threat detection,
+   vulnerability scans, and 24/7 SOC support. Custom enterprise pricing.
+5. Professional Services - Consulting, cloud migration, custom AI model
+   development, and staff augmentation, billed per engagement.
+
+All products include a 14-day free trial. Enterprise clients receive a
+dedicated account manager and onboarding support.
+
+--------------------------------------------------------------------------------
+SECTION 4: BUSINESS HOURS
+--------------------------------------------------------------------------------
+- Office hours (India): Monday to Friday, 9:30 AM to 6:30 PM IST.
+- Office hours (Singapore): Monday to Friday, 9:00 AM to 6:00 PM SGT.
+- Offices are closed on Saturdays, Sundays, and listed public holidays.
+- Customer support (chat and email): 24/7, all year round.
+- Phone support: Monday to Saturday, 8:00 AM to 10:00 PM IST.
+- Enterprise clients with a Premium Support plan receive 24/7 phone support.
+
+--------------------------------------------------------------------------------
+SECTION 5: CUSTOMER SUPPORT POLICIES
+--------------------------------------------------------------------------------
+- Support channels: live chat (website/app), email (support@technova.example),
+  phone (+91-80-4000-1234), and the customer portal.
+- First response time targets: Critical issues - 30 minutes; High - 2 hours;
+  Medium - 8 business hours; Low - 24 business hours.
+- Critical issues (production outage) are worked on continuously until
+  resolved, with hourly status updates.
+- Every ticket receives a unique ticket ID; customers can track status in the
+  portal.
+- Escalation: If unsatisfied, customers may request escalation to a support
+  manager. Second-level escalation goes to the Head of Customer Success.
+- Support is provided in English and Hindi; NovaChat product support is also
+  available in Tamil, Telugu, and Bahasa.
+
+--------------------------------------------------------------------------------
+SECTION 6: REFUND POLICY
+--------------------------------------------------------------------------------
+- Monthly subscriptions: Full refund if cancellation is requested within 7
+  days of the billing date. No refund after 7 days; service continues until
+  the end of the billing period.
+- Annual subscriptions: Pro-rated refund for unused full months if cancelled
+  within the first 90 days. After 90 days, no refund, but the plan can be
+  downgraded at renewal.
+- Free trials: No charges during the 14-day trial; no refund needed.
+- Professional services: Refunds are governed by the individual Statement of
+  Work (SOW). Advance payments for undelivered milestones are refundable.
+- Refunds are processed to the original payment method within 7-10 business
+  days after approval.
+- To request a refund, email billing@technova.example with the invoice number,
+  or raise a request in the customer portal under Billing > Refund Request.
+- Refunds are not provided for account suspensions caused by violations of the
+  Acceptable Use Policy.
+
+--------------------------------------------------------------------------------
+SECTION 7: PRIVACY POLICY (SUMMARY)
+--------------------------------------------------------------------------------
+- TechNova collects only the data necessary to provide its services: account
+  details, billing information, usage logs, and support interactions.
+- Customer data is never sold to third parties.
+- Data is shared only with vetted sub-processors (e.g., cloud infrastructure
+  and payment providers) under strict data processing agreements.
+- Customers may request access, correction, export, or deletion of their
+  personal data by emailing privacy@technova.example. Requests are fulfilled
+  within 30 days.
+- Cookies are used for authentication, preferences, and product analytics.
+  Non-essential cookies can be disabled in account settings.
+- TechNova complies with India's DPDP Act, GDPR (for EU customers), and
+  Singapore's PDPA.
+- Data Protection Officer (DPO): dpo@technova.example.
+
+--------------------------------------------------------------------------------
+SECTION 8: DATA RETENTION POLICY
+--------------------------------------------------------------------------------
+- Active customer data is retained for the duration of the subscription.
+- After account closure, customer data is retained for 90 days (grace period
+  for reactivation), then permanently deleted within 30 additional days.
+- Backups are encrypted and retained for 35 days on a rolling basis.
+- Billing and tax records are retained for 8 years as required by law.
+- Support tickets and chat transcripts are retained for 3 years.
+- Application logs are retained for 180 days; security logs for 1 year.
+- Customers can request early deletion of their data after account closure,
+  subject to legal retention requirements.
+
+--------------------------------------------------------------------------------
+SECTION 9: EMPLOYEE HANDBOOK (KEY POINTS)
+--------------------------------------------------------------------------------
+- Probation period: 6 months for all new hires, with a review at the end.
+- Work model: Hybrid. Employees work from office at least 3 days per week
+  (Tuesday to Thursday are anchor days). Fully remote roles require VP
+  approval.
+- Working hours: 9 hours per day including a 1-hour lunch break. Flexible
+  start time between 8:00 AM and 10:30 AM.
+- Dress code: Smart casual. Formal wear for client meetings.
+- Payroll: Salary is credited on the last working day of each month.
+- Notice period: 60 days for all employees; 90 days for senior management.
+- Employee referral bonus: INR 50,000 for engineering roles, INR 25,000 for
+  other roles, paid after the referred employee completes 3 months.
+- Health insurance: Company-paid coverage of INR 10 lakh per employee,
+  extendable to spouse, children, and parents at subsidized rates.
+- IT equipment: All employees receive a company laptop. Damage or loss must
+  be reported to IT within 24 hours.
+
+--------------------------------------------------------------------------------
+SECTION 10: LEAVE POLICY
+--------------------------------------------------------------------------------
+- Annual paid leave: 24 days per calendar year, accrued monthly (2 per month).
+- Sick leave: 12 days per year. A medical certificate is required for more
+  than 2 consecutive sick days.
+- Casual leave: Included within the 24 annual leave days.
+- Public holidays: 10 fixed holidays plus 2 floating holidays of the
+  employee's choice.
+- Maternity leave: 26 weeks fully paid, as per law.
+- Paternity leave: 4 weeks fully paid, to be used within 6 months of the
+  child's birth.
+- Bereavement leave: 5 days for immediate family.
+- Leave carry-forward: Up to 8 unused leave days can be carried to the next
+  year; the rest lapse. Leave encashment happens only at exit.
+- Leave application: Apply through the HR portal (NovaHR) at least 3 working
+  days in advance for planned leave. Manager approval is required.
+- Unapproved absence of more than 3 consecutive days is treated as
+  absconding and triggers an HR inquiry.
+
+--------------------------------------------------------------------------------
+SECTION 11: CODE OF CONDUCT
+--------------------------------------------------------------------------------
+- Treat all colleagues, customers, and partners with respect and dignity.
+  Harassment, discrimination, or bullying of any kind results in disciplinary
+  action, up to termination.
+- Zero tolerance for bribery and corruption. Employees must not offer or
+  accept gifts above INR 5,000 in value from vendors or clients; anything
+  above must be declared to Compliance.
+- Conflicts of interest (e.g., outside employment, financial interest in a
+  vendor) must be disclosed to HR in writing.
+- Company resources (laptops, email, cloud accounts) are for business use;
+  limited personal use is acceptable if it does not violate policy.
+- Confidential information must not be shared outside the company or posted
+  on social media. This obligation continues after employment ends.
+- Violations can be reported to conduct@technova.example or through the
+  anonymous EthicsLine portal. Retaliation against reporters is strictly
+  prohibited.
+
+--------------------------------------------------------------------------------
+SECTION 12: INFORMATION SECURITY RULES
+--------------------------------------------------------------------------------
+- Multi-factor authentication (MFA) is mandatory for all company systems.
+- Passwords must be at least 12 characters and changed every 180 days;
+  password reuse across systems is prohibited.
+- All laptops are encrypted with full-disk encryption and managed by IT (MDM).
+- Company data must be stored only in approved systems (Google Workspace,
+  NovaCloud internal, approved SaaS). Personal drives and USB storage are
+  prohibited for company data.
+- Phishing or suspicious emails must be reported via the "Report Phish"
+  button or to security@technova.example within 1 hour of noticing.
+- Lost or stolen devices must be reported to IT Security immediately (within
+  4 hours) so the device can be remotely wiped.
+- Access follows the principle of least privilege and is reviewed quarterly.
+- Customer production data must never be copied to local machines or used in
+  test environments without anonymization.
+- Security incidents are handled by the Security Operations Center (SOC);
+  employees must not attempt to investigate on their own.
+- Annual security awareness training is mandatory for all employees.
+
+--------------------------------------------------------------------------------
+SECTION 13: TRAVEL POLICY
+--------------------------------------------------------------------------------
+- All business travel must be pre-approved by the reporting manager and booked
+  through the corporate travel portal (NovaTravel).
+- Domestic flights: Economy class. International flights: Economy for flights
+  under 6 hours; Premium Economy allowed for longer flights; Business class
+  only for VP level and above with CFO approval.
+- Hotel caps: Metro cities in India - INR 7,500/night; other Indian cities -
+  INR 5,000/night; international - USD 180/night unless pre-approved.
+- Daily meal allowance (per diem): INR 1,500 domestic; USD 60 international.
+  Receipts are required for reimbursement above per diem.
+- Local travel: Ride-hailing (Uber/Ola) or prepaid taxis are reimbursable;
+  personal car usage is reimbursed at INR 12/km.
+- Expense claims must be submitted in NovaHR within 15 days of trip
+  completion, with receipts. Claims after 30 days are not reimbursed.
+- Travel insurance is provided by the company for all international trips.
+- Combining personal travel with business trips is allowed with prior manager
+  approval; personal portions are at the employee's own cost.
+
+--------------------------------------------------------------------------------
+SECTION 14: PERFORMANCE REVIEW PROCESS
+--------------------------------------------------------------------------------
+- Review cycle: Twice a year - mid-year review (July) and annual review
+  (January).
+- Process: Self-assessment -> Manager assessment -> Calibration committee ->
+  Final rating and feedback conversation.
+- Rating scale: 5 levels - Outstanding (5), Exceeds Expectations (4), Meets
+  Expectations (3), Needs Improvement (2), Unsatisfactory (1).
+- Goals: Every employee sets OKRs at the start of each half, aligned with
+  team and company objectives. OKRs are tracked in NovaHR.
+- Promotions: Considered during the annual cycle (January). Requires a rating
+  of 4 or above and manager nomination.
+- Compensation: Annual increments are decided in the January cycle and
+  effective from April 1st. Bonus payout is linked to individual rating and
+  company performance.
+- Performance Improvement Plan (PIP): Employees rated 2 or below may be
+  placed on a 60-day PIP with clear goals and weekly check-ins. Failure to
+  meet PIP goals may lead to role change or exit.
+- 360-degree feedback: Peer feedback is collected for all employees in the
+  annual cycle; it is advisory and visible to the manager.
+
+================================================================================
+END OF KNOWLEDGE BASE
+================================================================================

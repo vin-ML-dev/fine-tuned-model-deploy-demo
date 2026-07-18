@@ -1,0 +1,27 @@
+{
+  "total_after_dedup": 380,
+  "splits": {
+    "train": 315,
+    "val": 34,
+    "test": 31
+  },
+  "sections": {
+    "conduct": 24,
+    "handbook": 34,
+    "hours": 16,
+    "leave": 34,
+    "meta": 6,
+    "mission": 20,
+    "out_of_scope": 6,
+    "overview": 34,
+    "performance": 28,
+    "privacy": 22,
+    "products": 34,
+    "refund": 26,
+    "retention": 20,
+    "security": 24,
+    "support": 22,
+    "travel": 30
+  },
+  "avg_answer_chars": 144.0
+}

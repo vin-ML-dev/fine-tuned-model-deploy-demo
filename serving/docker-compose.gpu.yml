@@ -1,0 +1,56 @@
+# Phase 4 - GPU serving stack: vLLM engine + FastAPI wrapper
+# Requires: NVIDIA GPU + nvidia-container-toolkit installed on the host.
+#
+# Usage:
+#   export HF_TOKEN=hf_xxx          # needed if the HF repo is private
+#   docker compose -f serving/docker-compose.gpu.yml up --build
+#
+# Test:
+#   curl -s localhost:8000/readyz
+#   curl -s -X POST localhost:8000/v1/chat -H 'Content-Type: application/json' \
+#     -d '{"message": "What is the refund policy for monthly subscriptions?"}'
+
+services:
+  engine:
+    image: vllm/vllm-openai:latest
+    command: >
+      --model vinmlops/technova-1.5b-instruct
+      --max-model-len 2048
+      --gpu-memory-utilization 0.90
+      --port 8001
+    environment:
+      - HUGGING_FACE_HUB_TOKEN=${HF_TOKEN:-}
+    ports:
+      - "8001:8001"
+    volumes:
+      - hf_cache:/root/.cache/huggingface   # cache model between restarts
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8001/v1/models || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 120s      # model load takes a while
+
+  api:
+    build:
+      context: ..
+      dockerfile: serving/Dockerfile.api
+    environment:
+      - ENGINE_BASE_URL=http://engine:8001/v1
+      - MODEL_NAME=vinmlops/technova-1.5b-instruct
+      - RATE_LIMIT_RPM=60
+    ports:
+      - "8000:8000"
+    depends_on:
+      engine:
+        condition: service_healthy
+
+volumes:
+  hf_cache:

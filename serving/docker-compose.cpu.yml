@@ -1,0 +1,50 @@
+# Phase 4 - CPU serving stack: llama.cpp server (GGUF) + FastAPI wrapper
+# No GPU needed - runs on any machine. Uses your quantized Q4_K_M model.
+#
+# Usage:
+#   export HF_TOKEN=hf_xxx          # needed if the GGUF repo is private
+#   docker compose -f serving/docker-compose.cpu.yml up --build
+#
+# Test:
+#   curl -s localhost:8000/readyz
+#   curl -s -X POST localhost:8000/v1/chat -H 'Content-Type: application/json' \
+#     -d '{"message": "How many paid leave days do employees get per year?"}'
+
+services:
+  engine:
+    image: ghcr.io/ggml-org/llama.cpp:server
+    command: >
+      -hf vinmlops/technova-1.5b-instruct-GGUF:technova-1.5b-Q4_K_M.gguf
+      --host 0.0.0.0 --port 8001
+      --ctx-size 2048
+      --parallel 4
+      --alias vinmlops/technova-1.5b-instruct
+    environment:
+      - HF_TOKEN=${HF_TOKEN:-}
+    ports:
+      - "8001:8001"
+    volumes:
+      - llama_cache:/root/.cache/llama.cpp
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8001/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+
+  api:
+    build:
+      context: ..
+      dockerfile: serving/Dockerfile.api
+    environment:
+      - ENGINE_BASE_URL=http://engine:8001/v1
+      - MODEL_NAME=vinmlops/technova-1.5b-instruct
+      - RATE_LIMIT_RPM=60
+    ports:
+      - "8000:8000"
+    depends_on:
+      engine:
+        condition: service_healthy
+
+volumes:
+  llama_cache:
