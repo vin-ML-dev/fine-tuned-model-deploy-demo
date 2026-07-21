@@ -260,11 +260,11 @@ user -> kubectl port-forward -> Service -> api pods (2..6, HPA) -> RunPod vLLM (
 ```
 
 ### Step 19: Cluster + first deploy
-Install [kind](https://kind.sigs.k8s.io/docs/user/quick-start/#installation) and kubectl, fill `serving/.env` (RunPod endpoint + key), then one command:
+Install [minikube](https://minikube.sigs.k8s.io/docs/start/) and kubectl, fill `serving/.env` (RunPod endpoint + key), then one command:
 ```bash
-bash k8s/setup_kind.sh
+bash k8s/setup_minikube.sh
 ```
-It creates the cluster, installs metrics-server (HPA dependency), builds + loads the API image, creates the secret from `.env`, and applies all manifests. Then:
+It starts minikube, enables the metrics-server addon, builds the API image inside minikube's docker daemon, creates the secret from `.env`, and applies all manifests. Then:
 ```bash
 kubectl -n novabot get pods -w                       # wait for 2/2 Ready
 kubectl -n novabot port-forward svc/novabot-api 8080:80
@@ -306,6 +306,42 @@ bash k8s/deploy_release.sh rollback        # one-command rollback
 ```bash
 kubectl -n novabot delete pod -l app=novabot-api --field-selector=status.phase=Running --force --grace-period=0
 # watch K8s immediately recreate them; service stays up (that's why replicas: 2)
+```
+
+---
+
+## Phase 6 — Real-Time Production Features (Redis cache, backpressure, A/B)
+
+New in `serving/app/main.py` (v2.0.0) — all features degrade gracefully when Redis is absent, so unit tests and minimal setups still work:
+
+- **Response cache (step 25):** deterministic requests (temperature 0, non-streaming) are cached in Redis keyed on (model, full message list, max_tokens), TTL 1h. Repeat questions return in ~ms without touching the GPU. Response includes `"cached": true/false`.
+- **Redis rate limiting:** counters move to Redis (fixed 60s windows) so limits are correct across all replicas; falls back to the in-memory limiter if Redis is down.
+- **Backpressure (step 24):** a semaphore caps concurrent engine calls per replica (`MAX_CONCURRENCY=8`); requests queue up to `QUEUE_TIMEOUT_S=10s`, then get a clean `503 Server busy` instead of piling onto the engine.
+- **A/B testing (step 27):** set `MODEL_B_NAME` (+ optionally `ENGINE_B_BASE_URL`) and `AB_SPLIT_PERCENT` to route a deterministic % of users to variant B. Same `user_id` (or IP) always gets the same variant; responses and logs carry `"variant": "A"/"B"` for analysis. This is the mechanism for safely rolling out the Phase 8 retrained model.
+
+### Deploy on the cluster
+```bash
+kubectl apply -f k8s/50-redis.yaml            # Redis (128MB, LRU eviction - cache semantics)
+kubectl apply -f k8s/20-deployment.yaml       # picks up REDIS_URL + Phase 6 env
+kubectl -n novabot rollout restart deploy/novabot-api
+kubectl -n novabot get pods                   # redis + 2 api pods
+```
+
+### Verify
+```bash
+kubectl -n novabot port-forward svc/novabot-api 8080:80
+# same question twice - second reply should show "cached": true and ~ms latency:
+curl -s -X POST localhost:8080/v1/chat -H 'Content-Type: application/json' \
+  -d '{"message": "What is the refund policy for monthly subscriptions?"}'
+curl -s -X POST localhost:8080/v1/chat -H 'Content-Type: application/json' \
+  -d '{"message": "What is the refund policy for monthly subscriptions?"}'
+curl -s localhost:8080/readyz                 # now reports redis: up/down/disabled
+```
+
+### Try A/B (when you have a second model version)
+```bash
+kubectl -n novabot set env deploy/novabot-api MODEL_B_NAME=vinmlops/technova-1.5b-instruct-v2 AB_SPLIT_PERCENT=20
+# 20% of users get variant B; check "variant" in responses/logs
 ```
 
 ---

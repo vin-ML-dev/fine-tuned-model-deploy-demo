@@ -46,6 +46,19 @@ spec:
               value: "60"
             - name: REQUEST_TIMEOUT_S
               value: "90"
+            # ---- Phase 6 ----
+            - name: REDIS_URL
+              value: "redis://redis:6379/0"   # 'redis' = the Service name
+            - name: CACHE_TTL_S
+              value: "3600"
+            - name: MAX_CONCURRENCY
+              value: "8"
+            - name: QUEUE_TIMEOUT_S
+              value: "10"
+            # A/B testing: set MODEL_B_NAME + AB_SPLIT_PERCENT to enable.
+            # (ENGINE_B_BASE_URL defaults to the A engine if unset.)
+            - name: AB_SPLIT_PERCENT
+              value: "0"
           livenessProbe:
             httpGet:
               path: /healthz

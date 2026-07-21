@@ -88,3 +88,50 @@ def test_build_messages_injects_system_prompt():
     assert msgs[0]["role"] == "system"
     assert "NovaBot" in msgs[0]["content"]
     assert msgs[-1] == {"role": "user", "content": "What is the refund policy?"}
+
+
+# ---------------------------------------------------------------------------
+# Phase 6 tests: cache keys, A/B assignment, backpressure config
+# ---------------------------------------------------------------------------
+
+def test_cache_key_deterministic_and_sensitive():
+    msgs = [{"role": "user", "content": "hi"}]
+    k1 = main.cache_key("model-a", msgs, 250)
+    k2 = main.cache_key("model-a", msgs, 250)
+    k3 = main.cache_key("model-a", [{"role": "user", "content": "hi!"}], 250)
+    k4 = main.cache_key("model-b", msgs, 250)
+    assert k1 == k2                      # same input -> same key
+    assert k1 != k3 and k1 != k4         # different message/model -> different key
+    assert k1.startswith("cache:")
+
+
+def test_ab_assignment_deterministic():
+    main.MODEL_B_NAME = "model-b"
+    main.AB_SPLIT_PERCENT = 50
+    v1 = main.assign_variant("user-42")
+    v2 = main.assign_variant("user-42")
+    assert v1 == v2                      # same user always same variant
+    main.MODEL_B_NAME = ""
+    main.AB_SPLIT_PERCENT = 0
+
+
+def test_ab_split_roughly_respected():
+    main.MODEL_B_NAME = "model-b"
+    main.AB_SPLIT_PERCENT = 30
+    n = 2000
+    b = sum(1 for i in range(n) if main.assign_variant(f"u{i}")[0] == "B")
+    assert 0.25 < b / n < 0.35           # ~30% +/- tolerance
+    main.MODEL_B_NAME = ""
+    main.AB_SPLIT_PERCENT = 0
+
+
+def test_ab_disabled_all_variant_a():
+    main.MODEL_B_NAME = ""
+    main.AB_SPLIT_PERCENT = 0
+    assert all(main.assign_variant(f"u{i}")[0] == "A" for i in range(50))
+
+
+def test_chat_returns_503_when_engine_is_down(client):
+    # engine down -> 503, but validates the schema fields exist end-to-end
+    r = client.post("/v1/chat", json={"message": "hello", "user_id": "u1"})
+    assert r.status_code == 503
