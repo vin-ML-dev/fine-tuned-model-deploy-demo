@@ -131,7 +131,34 @@ def test_ab_disabled_all_variant_a():
     assert all(main.assign_variant(f"u{i}")[0] == "A" for i in range(50))
 
 
-def test_chat_returns_503_when_engine_is_down(client):
+def test_chat_response_includes_variant_and_cached(client):
     # engine down -> 503, but validates the schema fields exist end-to-end
     r = client.post("/v1/chat", json={"message": "hello", "user_id": "u1"})
     assert r.status_code == 503
+
+
+# ---------------------------------------------------------------------------
+# Phase 7 tests: metrics endpoint + feedback loop
+# ---------------------------------------------------------------------------
+
+def test_metrics_endpoint(client):
+    client.get("/healthz")                       # generate at least one count
+    r = client.get("/metrics")
+    assert r.status_code == 200
+    assert "novabot_http_requests_total" in r.text
+    assert "novabot_chat_latency_seconds" in r.text
+
+
+def test_feedback_recorded(client):
+    r = client.post("/v1/feedback", json={
+        "request_id": "abc123", "rating": "up", "variant": "A"})
+    assert r.status_code == 200
+    assert r.json() == {"status": "recorded"}
+    m = client.get("/metrics").text
+    assert 'novabot_feedback_total{rating="up",variant="A"}' in m
+
+
+def test_feedback_invalid_rating_rejected(client):
+    r = client.post("/v1/feedback", json={
+        "request_id": "abc123", "rating": "meh"})
+    assert r.status_code == 422

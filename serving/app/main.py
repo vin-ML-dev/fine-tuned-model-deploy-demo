@@ -37,8 +37,10 @@ import uuid
 from collections import defaultdict, deque
 
 import httpx
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.responses import StreamingResponse
+from prometheus_client import (CONTENT_TYPE_LATEST, Counter, Histogram,
+                               generate_latest)
 from pydantic import BaseModel, Field
 
 # ---------------------------------------------------------------------------
@@ -70,7 +72,46 @@ SYSTEM_PROMPT = (
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 log = logging.getLogger("novabot-api")
 
-app = FastAPI(title="NovaBot API", version="2.0.0")
+app = FastAPI(title="NovaBot API", version="3.0.0")
+
+# ---------------------------------------------------------------------------
+# Phase 7 - Step 29: Prometheus metrics.
+# Middleware counts EVERY response by path+status (incl. 4xx/5xx);
+# chat-specific metrics add variant/cache dimensions; answer-length
+# histogram is a cheap model-drift signal (step 31).
+# ---------------------------------------------------------------------------
+def _metric(cls, name, doc, labels, **kw):
+    """Create a metric, or reuse the existing one if already registered
+    (happens when the module is reloaded, e.g. in tests)."""
+    try:
+        return cls(name, doc, labels, **kw)
+    except ValueError:
+        from prometheus_client import REGISTRY
+        return REGISTRY._names_to_collectors[name]
+
+
+HTTP_REQUESTS = _metric(Counter, "novabot_http_requests_total",
+                        "All HTTP responses", ["path", "method", "status"])
+CHAT_REQUESTS = _metric(Counter, "novabot_chat_requests_total",
+                        "Chat requests by outcome", ["variant", "cached", "status"])
+CHAT_LATENCY = _metric(Histogram, "novabot_chat_latency_seconds",
+                       "Chat end-to-end latency", ["variant", "cached"],
+                       buckets=[0.01, 0.05, 0.25, 0.5, 1, 2, 5, 10, 30, 60])
+ANSWER_CHARS = _metric(Histogram, "novabot_answer_chars",
+                       "Answer length in characters (drift signal)", ["variant"],
+                       buckets=[50, 100, 200, 400, 800, 1600])
+FEEDBACK = _metric(Counter, "novabot_feedback_total",
+                   "User feedback by rating", ["rating", "variant"])
+
+
+@app.middleware("http")
+async def count_requests(request: Request, call_next):
+    response = await call_next(request)
+    path = request.url.path
+    if path not in ("/metrics",):          # do not count scrapes
+        HTTP_REQUESTS.labels(path=path, method=request.method,
+                             status=str(response.status_code)).inc()
+    return response
 
 # ---------------------------------------------------------------------------
 # Redis (optional). All Redis features degrade gracefully to local fallbacks
@@ -271,6 +312,8 @@ async def chat(req: ChatRequest, request: Request):
         hit = await cache_get(key)
         if hit:
             latency_ms = int((time.perf_counter() - t0) * 1000)
+            CHAT_REQUESTS.labels(variant=variant, cached="true", status="ok").inc()
+            CHAT_LATENCY.labels(variant=variant, cached="true").observe(latency_ms / 1000)
             log.info(json.dumps({
                 "request_id": request_id, "variant": variant, "cached": True,
                 "latency_ms": latency_ms, "status": "ok",
@@ -285,6 +328,7 @@ async def chat(req: ChatRequest, request: Request):
     try:
         await asyncio.wait_for(_engine_slots.acquire(), timeout=QUEUE_TIMEOUT_S)
     except asyncio.TimeoutError:
+        CHAT_REQUESTS.labels(variant=variant, cached="false", status="busy").inc()
         raise HTTPException(status_code=503,
                             detail="Server busy. Please retry shortly.")
     try:
@@ -294,6 +338,9 @@ async def chat(req: ChatRequest, request: Request):
 
     answer = data["choices"][0]["message"]["content"].strip()
     latency_ms = int((time.perf_counter() - t0) * 1000)
+    CHAT_REQUESTS.labels(variant=variant, cached="false", status="ok").inc()
+    CHAT_LATENCY.labels(variant=variant, cached="false").observe(latency_ms / 1000)  #convert in seconds
+    ANSWER_CHARS.labels(variant=variant).observe(len(answer))
 
     if cacheable:
         await cache_set(key, {"answer": answer, "usage": data.get("usage")})
@@ -309,6 +356,32 @@ async def chat(req: ChatRequest, request: Request):
         variant=variant, cached=False, latency_ms=latency_ms,
         usage=data.get("usage"),
     )
+
+
+class FeedbackRequest(BaseModel):
+    request_id: str = Field(min_length=1, max_length=64)
+    rating: str = Field(pattern="^(up|down)$")
+    variant: str = Field(default="A", pattern="^(A|B)$")
+    comment: str | None = Field(default=None, max_length=1000)
+
+
+@app.post("/v1/feedback")
+async def feedback(fb: FeedbackRequest):
+    """Step 32: user feedback loop. Counted in metrics + logged as JSON;
+    these logs are the raw material for the Phase 8 retraining dataset."""
+    FEEDBACK.labels(rating=fb.rating, variant=fb.variant).inc()
+    log.info(json.dumps({
+        "event": "feedback", "request_id": fb.request_id,
+        "rating": fb.rating, "variant": fb.variant,
+        "comment": fb.comment or "",
+    }))
+    return {"status": "recorded"}
+
+
+@app.get("/metrics")
+async def metrics():
+    """Prometheus scrape endpoint."""
+    return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 
 @app.get("/healthz")

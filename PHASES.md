@@ -17,7 +17,7 @@
 | 4. Serving Infrastructure | 14–18 | ✅ Built | RunPod (bare processes) / Docker on laptop |
 | 5. Deployment (K8s + CI/CD) | 19–23 | ✅ Done | Laptop (kind/minikube) + GitHub Actions + GHCR |
 | 6. Real-Time Prod Features | 24–27 | ✅ Built | Same K8s cluster as Phase 5 |
-| 7. Observability & Reliability | 28–32 | ⏳ Pending | Same K8s cluster as Phase 5 |
+| 7. Observability & Reliability | 28–32 | ✅ Built | Same K8s cluster as Phase 5 |
 | 8. Lifecycle (retrain, MLflow) | 33–36 | ⏳ Pending | RunPod (training) + K8s (deploy) |
 
 ---

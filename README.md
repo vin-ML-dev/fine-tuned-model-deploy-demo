@@ -346,7 +346,39 @@ kubectl -n novabot set env deploy/novabot-api MODEL_B_NAME=vinmlops/technova-1.5
 
 ---
 
-## What comes next (later phases in this repo)
+## Phase 7 — Observability & Reliability (Prometheus + Grafana + alerts + feedback)
 
-- **Phase 6:** Redis caching, request prioritization, A/B testing.
-- **Phases 6–8:** caching, monitoring (Prometheus/Grafana), drift detection, retraining loop.
+New in `serving/app/main.py` (v3.0.0):
+- **`/metrics` endpoint (step 29):** Prometheus format. Metrics: `novabot_http_requests_total` (every response, by path/status — via middleware), `novabot_chat_requests_total` (by variant/cached/status), `novabot_chat_latency_seconds` histogram, `novabot_answer_chars` histogram (**drift signal**, step 31 — a shifting answer-length distribution flags model behavior change), `novabot_feedback_total`.
+- **`POST /v1/feedback` (step 32):** `{request_id, rating: up|down, variant, comment}` → counted in metrics + logged as JSON. These logs are the raw material for Phase 8's retraining dataset.
+
+New in `k8s/60-monitoring.yaml`:
+- **Prometheus** — discovers api pods via Kubernetes service discovery (RBAC included), scrapes `/metrics` every 15s, evaluates **alert rules** (step 30): HighErrorRate (>5% 5xx), HighLatencyP95 (>10s uncached), ApiDown, NegativeFeedbackSpike (thumbs-down rate doubles = model quality alarm). View at `/alerts`. (Alertmanager routing to Slack/email = cloud phase.)
+- **Grafana** — auto-provisioned with the Prometheus datasource and a **NovaBot Overview dashboard**: request rate by status, p95 latency (cached vs not), cache hit ratio, A/B traffic split, feedback up/down, answer-length drift, backpressure rejections.
+
+### Deploy
+```bash
+# code changed -> rebuild API image inside minikube/kind, then:
+kubectl apply -f k8s/60-monitoring.yaml
+kubectl -n novabot rollout restart deploy/novabot-api
+kubectl -n novabot get pods        # + prometheus, grafana pods
+```
+
+### Explore
+```bash
+kubectl -n novabot port-forward svc/novabot-api 8080:80      # terminal 1
+kubectl -n novabot port-forward svc/prometheus 9090:9090     # terminal 2
+kubectl -n novabot port-forward svc/grafana 3000:3000        # terminal 3
+
+# generate traffic + feedback:
+for i in $(seq 1 30); do curl -s -o /dev/null -X POST localhost:8080/v1/chat \
+  -H 'Content-Type: application/json' -d '{"message":"What is the refund policy?"}'; done
+curl -s -X POST localhost:8080/v1/feedback -H 'Content-Type: application/json' \
+  -d '{"request_id":"test1","rating":"up","variant":"A"}'
+
+# Prometheus: http://localhost:9090  (try: sum(rate(novabot_chat_requests_total[5m])) by (cached))
+# Grafana:    http://localhost:3000  (admin/admin) -> Dashboards -> NovaBot -> NovaBot Overview
+```
+
+---
+
